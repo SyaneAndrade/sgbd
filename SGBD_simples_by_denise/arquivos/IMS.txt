@@ -1,0 +1,13 @@
+DATA_BASE_NAME banco_santander
+Size 1024
+|TABLE pessoa_fisica
+$nome TEXT
+$id INT
+$Primary_key id
+|TABLE conta
+$id_pessoa INT
+$digito_conta INT
+$numero_conta TEXT
+$Primary_key numero_conta
+
+
