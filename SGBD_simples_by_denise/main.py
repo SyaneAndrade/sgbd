@@ -77,8 +77,6 @@ def cria_row(table):
             row[key] = verify_type_field(data, table.field[key])
             if (row[key] is not False):
                 break
-    import pdb
-    pdb.set_trace()
     key1 = table.key1
     for row2 in table.rows:
         if row[key1] == row2[key1]:
@@ -190,7 +188,8 @@ if __name__ == '__main__':
                     print("(1) - Listar todos os dados do banco")
                     print("(2) - Adcionar informação ao banco ")
                     print("(3) - Fazer consulta")
-                    print("(4) - Sair")
+                    print("(4) - DROP DATA BASE")
+                    print("(5) - Sair")
                     aux1 = input("Opção: ")
                     if aux1 == "1":
                         print("Ainda não implementado")
@@ -200,8 +199,21 @@ if __name__ == '__main__':
                     if aux1 == "3":
                         print("")
                     if aux1 == "4":
+                        flag = False
+                        while True:
+                            aux = input("\nCerteza que deseja excluir o banco " + bd.name + " (S) ou (N): ")
+                            if aux == 'S':
+                                ged.drop_data_base(bd.name)
+                                input("Exclusão sendo feita, aperte qualquer tecla pra continuar...")
+                                flag = True
+                                break
+                            elif aux == 'N':
+                                break
+                        if flag:
+                            break
+                    if aux1 == "5":
                         for table in bd.table:
-                            ged.save_disc(table)
+                            ged.save_disc(bd)
                         input("Saindo ...\n Pressione qualquer tecla pra continuar")
                         break
         elif aux == '0':

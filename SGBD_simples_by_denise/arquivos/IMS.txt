@@ -9,5 +9,3 @@ $id_pessoa INT
 $digito_conta INT
 $numero_conta TEXT
 $Primary_key numero_conta
-
-
