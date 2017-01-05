@@ -8,6 +8,7 @@ import sys
 # Função que limpa a tela pra ficar bonitinho
 def clear():
     os.system("cls")
+    os.system("clear")
 
 
 # Validação de campo, do tipo da tabela
@@ -159,6 +160,132 @@ def Selecionatable(bd, ged):
             if aux1 == "N":
                 break
 
+
+#Funcao que faz a interface para fazer uma query
+def fazerConsulta (bd):
+    while True:
+        print("SGBD Simples by Denise")
+        print("-------------------------------------------")
+        print("-- Selecione a tabela para fazer a busca --")
+        print("-------------------------------------------")
+        for i in range(0, len(bd.table)):
+            print("({0}) - {1}".format(i, bd.table[i].name))
+        option = int(input("Opção: "))
+        if(bd.table[option]):
+            montarQuery(bd.table[option])
+            break
+        else:
+            aux1 = input("Entrada invalida!!!\n Deseja tentar novamente? (S) ou (N): ")
+            if aux1 == "N":
+                break
+
+def montarQuery (table):
+    while True:
+        print("SGBD Simples by Denise")
+        print("-------------------------------------------")
+        print("-- Selecione 0 para buscar todos ou escolha por qual campo você quer filtrar a consulta --")
+        print("-------------------------------------------")
+        print("(0) - Buscar todos (select *)")
+        counter = 1
+        auxDict = {0: 'All'} #dicionario utilizado para guardar os indices, tendo em vista que o table.field não é um dicionário ordenado
+        for field in table.field:
+            print("({0}) - {1}".format(counter, field))
+            auxDict[counter] = field
+            counter += 1
+        option = int(input("Opção: "))
+        if(option in auxDict):
+            if (option == 0):
+                queryPrintResults(table.search('All'))
+                break
+            else:
+                choosedField = auxDict[option]
+                fieldType = table.field[auxDict[option]]
+                queryPrepararConsulta(table, choosedField, fieldType)
+            break
+        else:
+            aux1 = input("Entrada invalida!!!\n Deseja tentar novamente? (S) ou (N): ")
+            if aux1 == "N":
+                break
+
+#depois de ter escolhido o campo no qual quer filtrar, esta na hora de fazer os filtros
+def queryPrepararConsulta (table, field, fieldType):
+    operadorNumber = {
+        0: '>',
+        1: '<',
+        2: '>=',
+        3: '<=',
+        4: '='
+    }
+    operadorText = {
+        0: 'like',
+        1: 'percentLike'
+    }
+    while True:
+        print("SGBD Simples by Denise")
+        print("--------------------------------------------")
+        print("---- Entre com o número para o operador ----")
+        print("-- Filtrando a consulta pela coluna: {0} ".format(field))
+        print("--------------------------------------------")
+        if(fieldType == 'INT'):
+            print("(0) - > valor")
+            print("(1) - < valor")
+            print("(2) - >= valor")
+            print("(3) - =< valor")
+            print("(4) - = valor")
+        if(fieldType == 'DECIMAL'):
+            print("(0) - > valor")
+            print("(1) - < valor")
+            print("(2) - >= valor")
+            print("(3) - =< valor")
+            print("(4) - = valor")
+        if(fieldType == 'TEXT'):
+            print("(0) - like valor")
+            print("(1) - like %valor%")
+        option = int(input("Opção: "))
+        if((fieldType == "TEXT") and (option<=1 and option >= 0)):
+            print('Entre com o valor desejado')
+            valor = input("valor: ")
+            operador = operadorText[option]
+            query = {
+                "col":field,
+                "value":valor,
+                "operator":operador
+            }
+            queryPrintResults(table.search(query))
+            break
+        elif((fieldType == "INT") and (option<=4 and option >= 0)):
+            print('Entre com o valor desejado')
+            valor = int(input("valor: "))
+            query = {
+                "col":field,
+                "value":valor,
+                "operator":operadorNumber[option]
+            }
+            queryPrintResults(table.search(query))
+            break
+        elif((fieldType == "DECIMAL") and (option<=4 and option >= 0)):
+            print('Entre com o valor desejado')
+            valor = float(input("valor: "))
+            query = {
+                "col":field,
+                "value":valor,
+                "operator":operadorNumber[option]
+            }
+            queryPrintResults(table.search(query))
+            break
+        else:
+            aux1 = input("Entrada invalida!!!\n Deseja tentar novamente? (S) ou (N): ")
+            if aux1 == "N":
+                break
+
+#Imprime os resultados das queries
+def queryPrintResults(rows):
+    clear()
+    print(rows)
+    continuar = (input("Aperte enter para continuar: "))
+
+
+
 # Menu
 if __name__ == '__main__':
     ged = GED()
@@ -198,7 +325,7 @@ if __name__ == '__main__':
                         clear()
                         Selecionatable(bd, ged)
                     if aux1 == "3":
-                        print("")
+                        fazerConsulta(bd)
                     if aux1 == "4":
                         for table in bd.table:
                             ged.save_disc(table)
