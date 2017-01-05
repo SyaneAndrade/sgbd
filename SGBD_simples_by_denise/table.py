@@ -33,13 +33,7 @@ class Table(object):
             return self.rows
         else:
             results = []
-            print('-------- ROWSSS ----------')
-            print(self.rows)
-            print('-------- /ROWSSS ----------')
             for row in self.rows:
-                print('-------- ROW ----------')
-                print(row)
-                print('-------- /ROW ----------')
                 if (query['operator'] == '>'):
                     if(row[query['col']] > query['value']):
                         results.append(row)
