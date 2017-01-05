@@ -98,26 +98,26 @@ class GED(object):
         ...
         \n\n\n
     """
-    def save_disc(self, bd):
+    def save_disc(self, database):
         file = self.OpenFile("read", self.path_disc)
         text = file.read()
         file.close()
         text = text.decode().replace("\r", "")
         text = text.split("\n\n\n")
         mem = ""
-        for i in text:
-            if i != "":
-                info = i.split("|")
+        for text_slice in text:
+            if text_slice != "":
+                db_info = text_slice.split("|")
                 try:
-                    name_db = info[0].split(" ")[1].replace("\n", "")
+                    name_db = db_info[0].split(" ")[1].replace("\n", "")
                 except:
                     name_db = ""
-                if bd.name != name_db:
+                if database.name != name_db:
                     mem = mem + "\n\n\n" + i
                     continue
-                mem = mem + "\n\n\n" + info[0]
+                mem = mem + "\n\n\n" + db_info[0]
                 temp_mem = ""
-                for table in bd.table:
+                for table in database.table:
                     temp_mem = temp_mem + "|TABLE " + table.name + "\n"
                     for row in table.rows:
                         temp_mem = temp_mem +"$"
@@ -149,30 +149,30 @@ class GED(object):
         file.close()
         text = text.decode()
         text = text.split("\n\n\n")
-        for i in text:
-            if i != "" and i != "\n":
-                info = i.split("|")
-                name_base = info[0].split(" ")[1].replace("\n", "")
+        for slice_text in text:
+            if slice_text != "" and slice_text != "\n":
+                bd_info = slice_text.split("|")
+                name_base = bd_info[0].split(" ")[1].replace("\n", "")
                 name_base = name_base.replace("\r", "")
                 data_base = None
-                for d in list_data_base:
-                    if d.name == name_base:
-                        data_base = d
+                for database in list_data_base:
+                    if database.name == name_base:
+                        data_base = database
                 if data_base is None:
                     continue
-                for a in range(1, len(info)):
-                    b = info[a].split("$")
-                    table_name = b[0].split(" ")[1].replace("\n", "")
+                for a in range(1, len(bd_info)):
+                    table_temp = bd_info[a].split("$")
+                    table_name = table_temp[0].split(" ")[1].replace("\n", "")
                     table = None
-                    for t in data_base.table:
-                        if table_name == t.name:
-                            table = t
+                    for tabela in data_base.table:
+                        if table_name == tabela.name:
+                            table = tabela
                     if table is None:
                         continue
                     row = {}
-                    for c in range(1, len(b)):
-                        temp = b[c].split("\n")
-                        for elem in temp:
+                    for c in range(1, len(table_temp)):
+                        temp_linha = table_temp[c].split("\n")
+                        for elem in temp_linha:
                             if elem != "":
                                 inf = elem.split(" ")
                                 key = inf[0].replace("\n", "")
@@ -183,34 +183,32 @@ class GED(object):
                         table.rows.append(row.copy())
 
     def drop_disc(self, text, name_base):
-        import pdb
-        pdb.set_trace()
         temp = ""
-        for i in text:
-            if i != "":
-                info = i.split("|")
-                bd_name = info[0].split(" ")[1].replace("\n", "")
+        for text_slice in text:
+            if text_slice != "":
+                bd_info = text_slice.split("|")
+                bd_name = bd_info[0].split(" ")[1].replace("\n", "")
                 bd_name = bd_name.replace("\r", "")
                 if bd_name == name_base:
-                    i = ""
-                    temp = temp + i
+                    text_slice = ""
+                    temp = temp + text_slice
                 else:
-                    temp = temp + "\n\n\n" + i
+                    temp = temp + "\n\n\n" + text_slice
         return temp
 
     def drop_ims(self, text, name_base):
         temp = ""
-        for i in text:
-            if i != "" and i != "\n":
-                info = i.split("|")
-                mem = info[0].split("\n")
+        for text_slice in text:
+            if text_slice != "" and text_slice != "\n":
+                bd_info = text_slice.split("|")
+                mem = bd_info[0].split("\n")
                 dado = mem[0].split(" ")
                 tam = mem[1].split(" ")
                 if dado[1] == name_base:
-                    i = ""
+                    text_slice = ""
                     temp = temp
                 else:
-                    temp = temp + i +"\n\n\n"
+                    temp = temp + text_slice +"\n\n\n"
         return temp
 
     def drop_data_base(self, name_base):
@@ -242,25 +240,25 @@ class GED(object):
         text = text.decode()
         text = text.split("\n\n\n")
         data_bases = []
-        for i in text:
-            if i != "" and i != "\n":
-                info = i.split("|")
-                mem = info[0].split("\n")
+        for text_slice in text:
+            if text_slice != "" and text_slice != "\n":
+                db_info = text_slice.split("|")
+                mem = db_info[0].split("\n")
                 dado = mem[0].split(" ")
                 tam = mem[1].split(" ")
                 data_base = Data_Base(dado[1], tam[1])
             else:
                 continue
-            for j in range(1, len(info)):
-                b = info[j].split("$")
-                table = Table(data_base, b[0].split(" ")[1].replace("\n", ""))
+            for j in range(1, len(db_info)):
+                temp_table = db_info[j].split("$")
+                table = Table(data_base, temp_table[0].split(" ")[1].replace("\n", ""))
                 data_base.table.append(table)
-                for a in range(1, len(b)):
-                    if a != len(b)-1:
-                        field = b[a].split(" ")
+                for a in range(1, len(temp_table)):
+                    if a != len(temp_table)-1:
+                        field = temp_table[a].split(" ")
                         table.field[field[0]] = field[1].replace("\n", "")
                     else:
-                        table.key1 = b[a].split(" ")[1].replace("\n", "")
+                        table.key1 = temp_table[a].split(" ")[1].replace("\n", "")
             data_bases.append(data_base)
         file.close()
         self.loking_db_row(data_bases)
