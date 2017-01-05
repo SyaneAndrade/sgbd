@@ -17,3 +17,43 @@ class Table(object):
             else:
                 print("Error! Primary key already exist!!!")
         self.field[name] = type_field
+
+
+    #Pesquisa no banco
+        #Recebe um dicionario que contem as seguintes coisas:
+        '''
+        query = {
+            col: 'nome',
+            operator: 'like',
+            value: 'gui'
+        }
+        '''
+    def search(self, query='All'):
+        if (query == "All"):
+            return self.rows
+        else:
+            results = []
+            for row in self.rows:
+                if (query['operator'] == '>'):
+                    if(row[query['col']] > query['value']):
+                        results.append(row)
+                if (query['operator'] == '<'):
+                    if(row[query['col']] < query['value']):
+                        results.append(row)
+                if (query['operator'] == '>='):
+                    if(row[query['col']] >= query['value']):
+                        results.append(row)
+                if (query['operator'] == '<='):
+                    if(row[query['col']] <= query['value']):
+                        results.append(row)
+                if (query['operator'] == '='):
+                    if(row[query['col']] == query['value']):
+                        results.append(row)
+                if (query['operator'] == 'like'):
+                    if(row[query['col']] == query['value']):
+                        results.append(row)
+                if (query['operator'] == 'percentLike'):
+                    #substring
+                    if(query['value'] in row[query['row']]):
+                        results.append(row)
+            return results

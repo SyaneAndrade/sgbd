@@ -196,7 +196,9 @@ class GED(object):
                                 key = inf[0].replace("\n", "")
                                 data = inf[1].replace("\n", " ")
                                 row[key] = self.verify_type_field(data, table.field[key])
-                        table.rows.append(row)
+                                # inf = elem.split(" ")
+                                # row[inf[0].replace("\n", "")] =  inf[1].replace("\n", " ")
+                        table.rows.append(row.copy())
 
     def drop_disc(self, text, name_base):
         temp = ""
@@ -239,6 +241,7 @@ class GED(object):
         text_ims = text_ims.split("\n\n\n")
         text = self.drop_disc(text, name_base)
         text_ims = self.drop_ims(text_ims, name_base)
+
 
     # Retorna a lista de bancos existentes
     def loking_db(self, name):
