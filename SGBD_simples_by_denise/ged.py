@@ -179,7 +179,7 @@ class GED(object):
                                 row[key] = self.verify_type_field(data, table.field[key])
                                 # inf = elem.split(" ")
                                 # row[inf[0].replace("\n", "")] =  inf[1].replace("\n", " ")
-                                table.rows.append(row)
+                        table.rows.append(row.copy())
 
     # Retorna a lista de bancos existentes
     def loking_db(self, name):
