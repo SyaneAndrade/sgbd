@@ -339,8 +339,7 @@ if __name__ == '__main__':
                         if flag:
                             break
                     if aux1 == "5":
-                        for table in bd.table:
-                            ged.save_disc(bd)
+                        ged.save_disc(bd)
                         input("Saindo ...\n Pressione qualquer tecla pra continuar")
                         break
         elif aux == '0':

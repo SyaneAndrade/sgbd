@@ -54,9 +54,10 @@ class GED(object):
         mem_disc = file_disc.read()
         file_disc.close()
         file.close()
+        mem_disc = mem_disc.decode()
         file = self.OpenFile("write", self.path_ims)
         file_disc = self.OpenFile("write", self.path_disc)
-        text_disc = mem_disc.decode() + "\n\n\n" + "DATA_BASE_NAME " + data_base.name
+        text_disc = mem_disc + "DATA_BASE_NAME " + data_base.name
         text = mem.decode() + "DATA_BASE_NAME " + data_base.name
         text = text + "\nSize " + data_base.size
         for table in data_base.table:
@@ -67,8 +68,10 @@ class GED(object):
             text = text + "\n$Primary_key" + " " + table.key1
         text = text + "\n\n\n"
         text_disc = text_disc + "\n\n\n"
+        size_disc = file.tell()
         size = file.tell()
         file.seek(size, 2)
+        file_disc.seek(size, 2)
         file.write(text.encode())
         file_disc.write(text_disc.encode())
         file.close()
@@ -96,8 +99,6 @@ class GED(object):
         \n\n\n
     """
     def save_disc(self, bd):
-        import pdb
-        pdb.set_trace()
         file = self.OpenFile("read", self.path_disc)
         text = file.read()
         file.close()
@@ -105,41 +106,24 @@ class GED(object):
         text = text.split("\n\n\n")
         mem = ""
         for i in text:
-            info = i.split("|")
-            try:
-                name_db = info[0].split(" ")[1].replace("\n", "")
-            except:
-                name_db = ""
-            if bd.name != name_db:
-                mem = mem + i + "\n\n\n"
-                continue
-            mem = mem + "\n\n\n" + info[0]
-            temp_mem = ""
-            # |TABLE etc1\n
-            # $field1 assas\n
-            # field2 heiehe\n
-            # $field1 asasa\n
-            # field2 heueheeu\n
-            # |TABLE etc2\n
-            # ...
-            # \n\n\n
-            for table in bd.table:
-                temp_mem = temp_mem + "\n" + "\n|TABLE " + table.name
-                for row in table.rows:
-                    for key in row:
-                        temp_mem = temp_mem + "\n" + "$" + key + " " + str(row[key])
-            mem = mem + temp_mem + "\n\n\n"
-            # for a in range(1, len(info)):
-            #     c = info[a].split("$")
-            #     name_table = c[0].split(" ")[1].replace("\n", "")
-            #     if table.name != name_table:
-            #         mem = mem + "|" + info[a]
-            #         continue
-            #     mem = mem + "|" + info[a]
-            #     for row in table.rows:
-            #         mem = mem + "$"
-            #         for key in row:
-            #             mem = mem + key + " " + str(row[key]) + "\n"
+            if i != "":
+                info = i.split("|")
+                try:
+                    name_db = info[0].split(" ")[1].replace("\n", "")
+                except:
+                    name_db = ""
+                if bd.name != name_db:
+                    mem = mem + "\n\n\n" + i
+                    continue
+                mem = mem + "\n\n\n" + info[0]
+                temp_mem = ""
+                for table in bd.table:
+                    temp_mem = temp_mem + "|TABLE " + table.name + "\n"
+                    for row in table.rows:
+                        temp_mem = temp_mem +"$"
+                        for key in row:
+                            temp_mem = temp_mem + key + " " + str(row[key])+ "\n"
+                mem = mem + temp_mem
         file = self.OpenFile("write", self.path_disc)
         file.write(mem.encode())
         file.close()
@@ -166,7 +150,7 @@ class GED(object):
         text = text.decode()
         text = text.split("\n\n\n")
         for i in text:
-            if i != "":
+            if i != "" and i != "\n":
                 info = i.split("|")
                 name_base = info[0].split(" ")[1].replace("\n", "")
                 name_base = name_base.replace("\r", "")
@@ -188,8 +172,6 @@ class GED(object):
                     row = {}
                     for c in range(1, len(b)):
                         temp = b[c].split("\n")
-                        import pdb
-                        pdb.set_trace()
                         for elem in temp:
                             if elem != "":
                                 inf = elem.split(" ")
@@ -201,34 +183,37 @@ class GED(object):
                         table.rows.append(row.copy())
 
     def drop_disc(self, text, name_base):
+        import pdb
+        pdb.set_trace()
         temp = ""
         for i in text:
             if i != "":
                 info = i.split("|")
                 bd_name = info[0].split(" ")[1].replace("\n", "")
+                bd_name = bd_name.replace("\r", "")
                 if bd_name == name_base:
-                    temp = temp
-                else:
+                    i = ""
                     temp = temp + i
+                else:
+                    temp = temp + "\n\n\n" + i
         return temp
 
     def drop_ims(self, text, name_base):
         temp = ""
         for i in text:
-            if i != "":
+            if i != "" and i != "\n":
                 info = i.split("|")
                 mem = info[0].split("\n")
                 dado = mem[0].split(" ")
                 tam = mem[1].split(" ")
                 if dado[1] == name_base:
+                    i = ""
                     temp = temp
                 else:
-                    temp = temp + i
+                    temp = temp + i +"\n\n\n"
         return temp
 
     def drop_data_base(self, name_base):
-        import pdb
-        pdb.set_trace()
         file_disc = self.OpenFile("read", self.path_disc)
         file = self.OpenFile("read", self.path_ims)
         text = file_disc.read()
@@ -237,10 +222,17 @@ class GED(object):
         file_disc.close()
         text = text.decode()
         text_ims = text_ims.decode()
+        text = text.replace("\r", "")
         text = text.split("\n\n\n")
         text_ims = text_ims.split("\n\n\n")
         text = self.drop_disc(text, name_base)
         text_ims = self.drop_ims(text_ims, name_base)
+        file = self.OpenFile("write", self.path_ims)
+        file_disc = self.OpenFile("write", self.path_disc)
+        file.write(text_ims.encode())
+        file_disc.write(text.encode())
+        file.close()
+        file_disc.close()
 
 
     # Retorna a lista de bancos existentes
@@ -251,7 +243,7 @@ class GED(object):
         text = text.split("\n\n\n")
         data_bases = []
         for i in text:
-            if i != "":
+            if i != "" and i != "\n":
                 info = i.split("|")
                 mem = info[0].split("\n")
                 dado = mem[0].split(" ")
@@ -272,6 +264,4 @@ class GED(object):
             data_bases.append(data_base)
         file.close()
         self.loking_db_row(data_bases)
-        import pdb
-        pdb.set_trace()
         return data_bases
